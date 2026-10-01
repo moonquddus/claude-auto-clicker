@@ -1,4 +1,4 @@
-# claude-auto
+# claude-auto-clicker
 
 Auto-pilot for Claude Code. It starts Claude Code and answers the permission
 prompts with `1. Yes`.
@@ -6,8 +6,9 @@ prompts with `1. Yes`.
 ## Why
 
 Claude Code has a bypass-permissions mode. That mode can still fall back to a
-permission prompt and stop work until you answer it. `claude-auto` watches for
-those prompts and answers them, so a long task does not wait for you.
+permission prompt and stop work until you answer it. `claude-auto-clicker`
+watches for those prompts and answers them, so a long task does not wait for
+you.
 
 You keep full control of the session. The wrapper passes your keyboard through
 to Claude Code, so you can type, interrupt and quit as usual.
@@ -25,20 +26,20 @@ directory first, because `install` does not create it:
 
 ```sh
 mkdir -p ~/.local/bin
-install -m 755 claude-auto.sh ~/.local/bin/claude-auto
+install -m 755 claude-auto.sh ~/.local/bin/claude-auto-clicker
 ```
 
-If `claude-auto` is not found after this, add the directory to your `PATH`.
+If `claude-auto-clicker` is not found after this, add the directory to your `PATH`.
 
 ## Use
 
-Use `claude-auto` in place of `claude`. It passes on every argument:
+Use `claude-auto-clicker` in place of `claude`. It passes on every argument:
 
 ```sh
-claude-auto
-claude-auto --resume
-claude-auto "fix the failing tests"
-claude-auto --dangerously-skip-permissions
+claude-auto-clicker
+claude-auto-clicker --resume
+claude-auto-clicker "fix the failing tests"
+claude-auto-clicker --dangerously-skip-permissions
 ```
 
 ## How it works
@@ -81,7 +82,7 @@ Set `CLAUDE_AUTO_TRACE` to a file to record every byte that Claude Code writes.
 Use this to build a pattern for a dialog that the wrapper does not answer.
 
 ```sh
-CLAUDE_AUTO_TRACE=/tmp/claude-auto.trace claude-auto
+CLAUDE_AUTO_TRACE=/tmp/claude-auto-clicker.trace claude-auto-clicker
 ```
 
 ## Log
@@ -89,7 +90,7 @@ CLAUDE_AUTO_TRACE=/tmp/claude-auto.trace claude-auto
 Set `CLAUDE_AUTO_LOG` to record each automatic answer:
 
 ```sh
-CLAUDE_AUTO_LOG=~/claude-auto.log claude-auto
+CLAUDE_AUTO_LOG=~/claude-auto-clicker.log claude-auto-clicker
 ```
 
 The wrapper does not write to the screen, because that damages the Claude Code
