@@ -10,11 +10,6 @@ set question {Do[^\r\n]{1,24}you[^\r\n]{1,24}want[^\r\n]{1,24}to[^?\r\n]{0,200}\
 set title {Network[^\r\n]{1,24}request[^\r\n]{1,24}outside[^\r\n]{1,24}of[^\r\n]{1,24}sandbox}
 # Claude Code draws ANSI attributes between "1." and "Yes".
 set option {1\.[^\r\n]{0,60}Yes}
-# Dialogs of one kind share a question. Every fetch asks "Do you want to allow
-# Claude to fetch this content?". Only the labelled body line tells two of them
-# apart, so it goes into the key that the debounce compares.
-set detail {(?:url|URL|Host|Path|File|Command):[^\r\n]{1,200}}
-set debounce 1000
 # Claude Code refuses input that arrives less than 150 ms after a dialog
 # appears, so that a stray keypress cannot approve it. Wait past that window.
 set settle 0.4
@@ -32,10 +27,7 @@ set claude $spawn_id
 set claude_tty $spawn_out(slave,name)
 
 set armed 0
-set approved 0
-set body ""
-set headline ""
-set last ""
+set stale 0
 
 proc resize {} {
     global claude_tty
@@ -48,19 +40,18 @@ proc resize {} {
 }
 
 proc approve {} {
-    global claude armed approved debounce settle body headline last env
+    global claude armed stale settle env
     if {!$armed} return
     # A stale latch must not approve a later "1. Yes" that is only prose.
     set armed 0
-    # A repainted frame must not send a second "1". It would land in the prompt
-    # box and be submitted to Claude as a message. A queued dialog repeats
-    # neither the body nor the question, so it is approved inside the window.
-    set key "$body|$headline"
-    if {$key eq $last && [clock milliseconds] - $approved < $debounce} return
-    set last $key
     sleep $settle
-    set approved [clock milliseconds]
     send -i $claude -- "1\r"
+    # Claude Code wrote the output that is waiting now before it read the "1",
+    # so it can only be a redraw of this dialog. A redraw can use other escape
+    # sequences, and a second "1" would go into the prompt box. The event loop
+    # becomes idle only after interact has read all of that output.
+    set stale 1
+    after idle { set stale 0 }
     if {[info exists env(CLAUDE_AUTO_LOG)]} {
         set log [open $env(CLAUDE_AUTO_LOG) a]
         puts $log "[clock format [clock seconds]] approved"
@@ -71,12 +62,10 @@ proc approve {} {
 resize
 trap resize WINCH
 
-# The body is read at approval time, not here. A wrapped question arms on the
-# title, which Claude Code draws before the body line.
+# A wrapped question arms on the title, which Claude Code draws first.
 interact -o \
-    -nobuffer -re $detail { set body $interact_out(0,string) } \
-    -nobuffer -re $question { set armed 1; set headline $interact_out(0,string) } \
-    -nobuffer -re $title { set armed 1; set headline $interact_out(0,string) } \
+    -nobuffer -re $question { if {!$stale} { set armed 1 } } \
+    -nobuffer -re $title { if {!$stale} { set armed 1 } } \
     -nobuffer -re $option { approve }
 
 catch wait result

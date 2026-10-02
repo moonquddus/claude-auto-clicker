@@ -61,17 +61,20 @@ ignores "ignores the question in prose"    prose.txt
 ignores "ignores an option list alone"     option-only.txt
 
 # Claude Code shows queued dialogs one at a time. The next one is drawn as soon
-# as the last is answered, well inside the debounce window.
+# as the last is answered, and can repeat its text exactly.
 queued() {
-    local name=$1 first=$2 second=$3
+    local name=$1 first=$2 second=$3 gap=${4:-0.3}
     STUB_FRAME="$fixtures/$first" STUB_FRAME2="$fixtures/$second" \
-        STUB_GAP=0.3 STUB_WAIT=6 run
+        STUB_GAP=$gap STUB_WAIT=6 run
     check "$name" "1<LF>" "$(field input2)"
 }
 
 queued "approves a dialog queued behind another" proceed.txt fetch.txt
 queued "approves a queued dialog that repeats the question" sandbox.txt sandbox-other.txt
 queued "approves a queued full-screen dialog" fullscreen.txt sandbox-fullscreen.txt
+queued "approves a queued dialog identical to the last" proceed.txt proceed.txt
+queued "approves a queued full-screen dialog identical to the last" fullscreen.txt fullscreen.txt
+queued "approves an identical dialog queued 20 ms after the answer" proceed.txt proceed.txt 0.02
 
 # Claude Code ignores input sent less than 150 ms after a dialog appears.
 STUB_FRAME="$fixtures/sandbox.txt" STUB_WAIT=4 run
@@ -81,6 +84,17 @@ check "waits out the input refusal window" "yes" \
 
 STUB_FRAME="$fixtures/proceed.txt" STUB_REPEAT=5 STUB_WAIT=4 run
 check "approves a redrawn frame once" "1<LF>" "$(field input)"
+
+STUB_FRAME="$fixtures/fullscreen.txt" STUB_REDRAW="$fixtures/fullscreen-spaced.txt" STUB_WAIT=4 run
+check "approves a frame redrawn with other escapes once" "1<LF>" "$(field input)"
+
+STUB_FRAME="$fixtures/fullscreen.txt" STUB_REDRAW="$fixtures/fullscreen-spaced.txt" \
+    STUB_REDRAW_DELAY=0.2 STUB_WAIT=4 run
+check "approves a frame redrawn during the wait once" "1<LF>" "$(field input)"
+
+# Recorded from Claude Code 2.1.286, text masked: a dialog drawn twice before an answer.
+STUB_FRAME="$fixtures/skill-redrawn.txt" STUB_WAIT=4 run
+check "approves a recorded double-drawn dialog once" "1<LF>" "$(field input)"
 
 CLAUDE_AUTO_TRACE="$tmp/trace" STUB_FRAME="$fixtures/sandbox.txt" run
 check "records a trace" "yes" "$(grep -qc 'outside of sandbox' "$tmp/trace" 2>/dev/null && echo yes)"

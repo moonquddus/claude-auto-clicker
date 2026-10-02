@@ -10,6 +10,11 @@ trap 'printf "size:%s\n" "$(stty size)" >> "$STUB_RECORD"' WINCH
 for _ in $(seq "${STUB_REPEAT:-1}"); do
     [ -n "${STUB_FRAME:-}" ] && printf '%b' "$(cat "$STUB_FRAME")"
 done
+# Claude Code can draw an open dialog a second time with other escape sequences.
+if [ -n "${STUB_REDRAW:-}" ]; then
+    sleep "${STUB_REDRAW_DELAY:-0}"
+    printf '%b' "$(cat "$STUB_REDRAW")"
+fi
 
 now() { python3 -c 'import time; print(time.time())'; }
 frame_at=$(now)
