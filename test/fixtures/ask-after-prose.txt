@@ -1,0 +1,1 @@
+\r\n I can start the fix now. Do you want me to continue?\r\n\r\n ☐ Gate B \r\n Shall I go ahead with the fix?\r\n\r\n \033[36m❯ 1. Yes\033[0m\r\n     Make the branch, test and fix.\r\n   2. No\r\n   3. Type something.\r\n

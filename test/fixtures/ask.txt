@@ -1,0 +1,1 @@
+\r\n ☐ Apply \r\n\r\n Do you want me to make this change and add the test case?\r\n\r\n \033[36m❯ 1. Yes, change and test (Recommended)\033[0m\r\n     Update the client and add the test case.\r\n   2. No\r\n     Make no changes.\r\n   3. Type something.\r\n\r\n Enter to select · ↑/↓ to navigate · Esc to cancel\r\n

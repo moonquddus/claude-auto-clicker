@@ -59,6 +59,9 @@ approves "approves a fetch prompt"          fetch.txt
 
 ignores "ignores the question in prose"    prose.txt
 ignores "ignores an option list alone"     option-only.txt
+ignores "ignores a question from Claude"    ask.txt
+ignores "ignores a full-screen question from Claude" ask-fullscreen.txt
+ignores "ignores a question from Claude after prose" ask-after-prose.txt
 
 # Claude Code shows queued dialogs one at a time. The next one is drawn as soon
 # as the last is answered, and can repeat its text exactly.
@@ -91,6 +94,10 @@ check "approves a frame redrawn with other escapes once" "1<LF>" "$(field input)
 STUB_FRAME="$fixtures/fullscreen.txt" STUB_REDRAW="$fixtures/fullscreen-spaced.txt" \
     STUB_REDRAW_DELAY=0.2 STUB_WAIT=4 run
 check "approves a frame redrawn during the wait once" "1<LF>" "$(field input)"
+
+STUB_FRAME="$fixtures/ask.txt" STUB_REDRAW="$fixtures/proceed.txt" \
+    STUB_REDRAW_DELAY=0.5 STUB_WAIT=4 run
+check "approves a dialog after a question from Claude" "1<LF>" "$(field input)"
 
 # Recorded from Claude Code 2.1.286, text masked: a dialog drawn twice before an answer.
 STUB_FRAME="$fixtures/skill-redrawn.txt" STUB_WAIT=4 run

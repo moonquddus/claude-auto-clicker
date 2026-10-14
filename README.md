@@ -66,7 +66,7 @@ The wait is necessary. Claude Code refuses input that arrives less than 150 ms
 after a dialog appears, so that a stray keypress cannot approve it. An
 immediate `1` is discarded, and the wrapper gets no second chance.
 
-Two checks keep the wrapper quiet:
+Three checks keep the wrapper quiet:
 
 - It answers only when the option list comes after the question. If Claude Code
   writes `Do you want to proceed?` in ordinary text, the wrapper does nothing.
@@ -76,6 +76,9 @@ Two checks keep the wrapper quiet:
   Code read the `1`, so it can only be a redraw. Each dialog after that is a
   new one, also when it has the same text as the last, for example a second
   edit to the same file.
+- It does not answer the questions that Claude asks you. Such a question has a
+  header chip, for example `☐ Next step`, and its first option is often `Yes`.
+  When the wrapper sees the chip, it ignores the question and its options.
 
 The script also copies the size of your terminal to Claude Code, and does it
 again when you change the size of the window.

@@ -10,6 +10,9 @@ set question {Do[^\r\n]{1,24}you[^\r\n]{1,24}want[^\r\n]{1,24}to[^?\r\n]{0,200}\
 set title {Network[^\r\n]{1,24}request[^\r\n]{1,24}outside[^\r\n]{1,24}of[^\r\n]{1,24}sandbox}
 # Claude Code draws ANSI attributes between "1." and "Yes".
 set option {1\.[^\r\n]{0,60}Yes}
+# A question that Claude asks the user has a header chip such as "☐ Next step"
+# above it, and its first option is often "Yes". A permission dialog has no chip.
+set ask {\u2610}
 # Claude Code refuses input that arrives less than 150 ms after a dialog
 # appears, so that a stray keypress cannot approve it. Wait past that window.
 set settle 0.4
@@ -59,11 +62,20 @@ proc approve {} {
     }
 }
 
+proc ignore_ask {} {
+    global armed stale
+    set armed 0
+    # The question and its options arrive in the same output as the chip.
+    set stale 1
+    after idle { set stale 0 }
+}
+
 resize
 trap resize WINCH
 
 # A wrapped question arms on the title, which Claude Code draws first.
 interact -o \
+    -nobuffer -re $ask { ignore_ask } \
     -nobuffer -re $question { if {!$stale} { set armed 1 } } \
     -nobuffer -re $title { if {!$stale} { set armed 1 } } \
     -nobuffer -re $option { approve }
