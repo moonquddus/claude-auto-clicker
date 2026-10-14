@@ -103,6 +103,25 @@ CLAUDE_AUTO_LOG=~/claude-auto-clicker.log claude-auto-clicker
 The wrapper does not write to the screen, because that damages the Claude Code
 display.
 
+## Keep your Mac awake
+
+A Mac that goes to sleep stops a long task. On macOS, use the built-in
+`caffeinate` command to prevent idle sleep while the wrapper runs:
+
+```sh
+caffeinate -i claude-auto-clicker
+```
+
+To do this each time, add an alias to your `~/.zshrc`:
+
+```sh
+alias claude-auto='caffeinate -i claude-auto-clicker'
+```
+
+`caffeinate` stops when the wrapper exits. The `-i` flag lets the display
+turn off. Use `-di` to keep the display on too. A Mac with a closed lid
+still goes to sleep, unless it has power and an external display.
+
 ## Tests
 
 ```sh
