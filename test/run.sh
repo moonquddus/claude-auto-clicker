@@ -99,6 +99,10 @@ STUB_FRAME="$fixtures/ask.txt" STUB_REDRAW="$fixtures/proceed.txt" \
     STUB_REDRAW_DELAY=0.5 STUB_WAIT=4 run
 check "approves a dialog after a question from Claude" "1<LF>" "$(field input)"
 
+STUB_FRAME="$fixtures/fullscreen.txt" STUB_REDRAW="$fixtures/fullscreen-spaced.txt" \
+    STUB_REDRAW_PIECES=6 STUB_WAIT=4 run
+check "approves a frame redrawn in pieces once" "1<LF>" "$(field input)"
+
 # Recorded from Claude Code 2.1.286, text masked: a dialog drawn twice before an answer.
 STUB_FRAME="$fixtures/skill-redrawn.txt" STUB_WAIT=4 run
 check "approves a recorded double-drawn dialog once" "1<LF>" "$(field input)"

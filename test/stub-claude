@@ -13,6 +13,11 @@ done
 # Claude Code can draw an open dialog a second time with other escape sequences.
 if [ -n "${STUB_REDRAW:-}" ]; then
     sleep "${STUB_REDRAW_DELAY:-0}"
+    # A large frame reaches the 1 KB pty in pieces, with short gaps.
+    for _ in $(seq "${STUB_REDRAW_PIECES:-0}"); do
+        printf '%512s' ''
+        sleep 0.01
+    done
     printf '%b' "$(cat "$STUB_REDRAW")"
 fi
 

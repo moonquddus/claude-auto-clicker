@@ -71,7 +71,8 @@ Three checks keep the wrapper quiet:
 - It answers only when the option list comes after the question. If Claude Code
   writes `Do you want to proceed?` in ordinary text, the wrapper does nothing.
 - It answers a given prompt once. Claude Code can draw an open dialog again
-  during the wait, with other escape sequences. After it sends `1`, the wrapper
+  during the wait, with other escape sequences. The wrapper continues to read
+  during the wait and ignores those redraws. After it sends `1`, the wrapper
   ignores all output that is already waiting. That output came before Claude
   Code read the `1`, so it can only be a redraw. Each dialog after that is a
   new one, also when it has the same text as the last, for example a second

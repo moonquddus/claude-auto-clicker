@@ -15,7 +15,7 @@ set option {1\.[^\r\n]{0,60}Yes}
 set ask {\u2610}
 # Claude Code refuses input that arrives less than 150 ms after a dialog
 # appears, so that a stray keypress cannot approve it. Wait past that window.
-set settle 0.4
+set settle 400
 
 # CLAUDE_AUTO_TRACE records every byte Claude Code writes, to build a pattern
 # for a dialog that the wrapper does not answer.
@@ -31,6 +31,7 @@ set claude_tty $spawn_out(slave,name)
 
 set armed 0
 set stale 0
+set waiting 0
 
 proc resize {} {
     global claude_tty
@@ -42,13 +43,26 @@ proc resize {} {
     }
 }
 
+proc arm {} {
+    global armed stale waiting
+    if {!$stale && !$waiting} { set armed 1 }
+}
+
 proc approve {} {
-    global claude armed stale settle env
+    global armed waiting settle
     if {!$armed} return
     # A stale latch must not approve a later "1. Yes" that is only prose.
     set armed 0
-    sleep $settle
+    # A sleep would stop interact from reading. Claude Code would then block
+    # on the full pty, and its redraws would arrive only after the "1".
+    set waiting 1
+    after $settle send_yes
+}
+
+proc send_yes {} {
+    global claude stale waiting env
     send -i $claude -- "1\r"
+    set waiting 0
     # Claude Code wrote the output that is waiting now before it read the "1",
     # so it can only be a redraw of this dialog. A redraw can use other escape
     # sequences, and a second "1" would go into the prompt box. The event loop
@@ -76,8 +90,8 @@ trap resize WINCH
 # A wrapped question arms on the title, which Claude Code draws first.
 interact -o \
     -nobuffer -re $ask { ignore_ask } \
-    -nobuffer -re $question { if {!$stale} { set armed 1 } } \
-    -nobuffer -re $title { if {!$stale} { set armed 1 } } \
+    -nobuffer -re $question { arm } \
+    -nobuffer -re $title { arm } \
     -nobuffer -re $option { approve }
 
 catch wait result
